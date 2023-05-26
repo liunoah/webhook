@@ -50,7 +50,7 @@ class WebhookHandler {
     //run build.sh
     const buildShell = `sh ./repo/${this.body.name}/build.sh`;
     await this.runShell(buildShell);
-    
+
 
 
     // console.log('start build image', this.body.name);
@@ -77,7 +77,13 @@ class WebhookHandler {
       console.log('start process', payload.repository.name);
       this.body.name = payload.repository.name;
       this.body.url = payload.repository.url;
-      this.cloneOrPull();
+      try {
+        this.cloneOrPull();
+      }
+      catch (e) {
+        console.log(e);
+      }
+
     }
   }
 
