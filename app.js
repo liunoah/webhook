@@ -77,18 +77,18 @@ class WebhookHandler {
   }
 
   processPayload(payload) {
-    if (payload.repository && payload.repository.name === 'noahblog') {
-      console.log('start process', payload.repository.name);
-      this.body.name = payload.repository.name;
-      this.body.url = payload.repository.url;
-      try {
-        this.cloneOrPull();
-      }
-      catch (e) {
-        console.log(e);
-      }
 
+    console.log('start process', payload.repository.name);
+    this.body.name = payload.repository.name;
+    this.body.url = payload.repository.url;
+    try {
+      this.cloneOrPull();
     }
+    catch (e) {
+      console.log(e);
+    }
+
+
   }
 
   handlePostRequest(req, res) {
