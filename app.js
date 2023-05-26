@@ -49,7 +49,11 @@ class WebhookHandler {
     await this.runShell(shellScript);
     //run build.sh
     const buildShell = `sh ./repo/${this.body.name}/build.sh`;
-    await this.runShell(buildShell);
+    try {
+      await this.runShell(buildShell);
+    } catch (e) {
+      console.log(e);
+    }
 
 
 
