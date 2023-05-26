@@ -80,7 +80,7 @@ class WebhookHandler {
 
     console.log('start process', payload.repository.name);
     this.body.name = payload.repository.name;
-    this.body.url = payload.repository.url;
+    this.body.url = payload.repository.ssh_url;
     try {
       this.cloneOrPull();
     }
