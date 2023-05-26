@@ -59,21 +59,12 @@ class WebhookHandler {
       console.log(e);
     }
     //run build.sh
-    const buildShell = `cd ./repo/${this.body.name}/ && sh build.sh`;
+    const buildShell = `sh ./repo/${this.body.name}/build.sh`;
     try {
       await this.runShell(buildShell);
     } catch (e) {
       console.log(e);
     }
-
-    //回到 主目录
-    const cdShell = `cd .. && cd ..`;
-    try {
-      await this.runShell(cdShell);
-    } catch (e) {
-      console.log(e);
-    }
-    
 
 
 
@@ -101,7 +92,7 @@ class WebhookHandler {
 
     console.log('start process', payload.repository.name);
     //将this.body.name的字符切换为小写
-    this.body.name = payload.repository.name.toLowerCase();
+    this.body.name = payload.repository.name
     this.body.url = payload.repository.ssh_url;
     try {
       this.cloneOrPull();
