@@ -47,24 +47,29 @@ class WebhookHandler {
     }
 
     await this.runShell(shellScript);
+    //run build.sh
+    const buildShell = `sh ./repo/${this.body.name}/build.sh`;
+    await this.runShell(buildShell);
+    
 
-    console.log('start build image', this.body.name);
-    const dockerBuild = `docker build -t ${this.body.name} ./repo/${this.body.name}`
-    await this.runShell(dockerBuild);
+
+    // console.log('start build image', this.body.name);
+    // const dockerBuild = `docker build -t ${this.body.name} ./repo/${this.body.name}`
+    // await this.runShell(dockerBuild);
 
 
     //stop docker container
-    console.log('start stop container', this.body.name);
-    const dockerStop = `docker stop ${this.body.name}`
-    await this.runShell(dockerStop);
-    //remove docker container
-    console.log('start remove container', this.body.name);
-    const dockerRemove = `docker rm ${this.body.name}`
-    await this.runShell(dockerRemove);
-    //run docker container
-    console.log('start run image', this.body.name);
-    const dockerRun = `docker run -d -p 3008:3008 --name  ${this.body.name} ${this.body.name}`
-    await this.runShell(dockerRun);
+    // console.log('start stop container', this.body.name);
+    // const dockerStop = `docker stop ${this.body.name}`
+    // await this.runShell(dockerStop);
+    // //remove docker container
+    // console.log('start remove container', this.body.name);
+    // const dockerRemove = `docker rm ${this.body.name}`
+    // await this.runShell(dockerRemove);
+    // //run docker container
+    // console.log('start run image', this.body.name);
+    // const dockerRun = `docker run -d -p 3008:3008 --name  ${this.body.name} ${this.body.name}`
+    // await this.runShell(dockerRun);
   }
 
   processPayload(payload) {
