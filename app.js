@@ -50,6 +50,14 @@ class WebhookHandler {
     }
 
     await this.runShell(shellScript);
+    //加权限 build.sh
+    console.log("添加权限");
+    const chmodShell = `chmod +x ./repo/${this.body.name}/build.sh`;
+    try {
+      await this.runShell(chmodShell);
+    } catch (e) {
+      console.log(e);
+    }
     //run build.sh
     const buildShell = `sh ./repo/${this.body.name}/build.sh`;
     try {
