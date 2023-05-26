@@ -39,7 +39,10 @@ class WebhookHandler {
     let shellScript;
     if (!fs.existsSync(`./repo/${this.body.name}`)) {
       console.log('start clone', this.body.name);
-      shellScript = `git clone ${this.body.url} ./repo/${this.body.name}`;
+      // shellScript = `git clone ${this.body.url} ./repo/${this.body.name}`;
+      // 跳过 yes or no
+      shellScript = `yes | git clone ${this.body.url} ./repo/${this.body.name}`;
+      
     } else {
       console.log('start pull', this.body.name);
       // git -C ./repo/noahblog pull
