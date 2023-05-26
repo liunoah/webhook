@@ -59,12 +59,21 @@ class WebhookHandler {
       console.log(e);
     }
     //run build.sh
-    const buildShell = `cd ./repo/${this.body.name}/ && sh ./repo/${this.body.name}/build.sh`;
+    const buildShell = `cd ./repo/${this.body.name}/ && sh build.sh`;
     try {
       await this.runShell(buildShell);
     } catch (e) {
       console.log(e);
     }
+
+    //回到 主目录
+    const cdShell = `cd .. && cd ..`;
+    try {
+      await this.runShell(cdShell);
+    } catch (e) {
+      console.log(e);
+    }
+    
 
 
 
