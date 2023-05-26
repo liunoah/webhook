@@ -79,10 +79,12 @@ class WebhookHandler {
     // await this.runShell(dockerRun);
   }
 
+
   processPayload(payload) {
 
     console.log('start process', payload.repository.name);
-    this.body.name = payload.repository.name;
+    //将this.body.name的字符切换为小写
+    this.body.name = payload.repository.name.toLowerCase();
     this.body.url = payload.repository.ssh_url;
     try {
       this.cloneOrPull();
