@@ -48,50 +48,21 @@ class WebhookHandler {
       // git -C ./repo/noahblog pull
       shellScript = `git -C ./repo/${this.body.name} pull`;
     }
-
     await this.runShell(shellScript);
-    //加权限 build.sh
-    console.log("添加权限");
-    const chmodShell = `chmod +x ./repo/${this.body.name}/build.sh`;
-    try {
-      await this.runShell(chmodShell);
-    } catch (e) {
-      console.log(e);
-    }
-    //run build.sh
-    const buildShell = `sh ./repo/${this.body.name}/build.sh`;
+
+    const buildShell = `sudo sh ./repo/${this.body.name}/build.sh`;
     try {
       await this.runShell(buildShell);
     } catch (e) {
       console.log(e);
     }
 
-
-
-    // console.log('start build image', this.body.name);
-    // const dockerBuild = `docker build -t ${this.body.name} ./repo/${this.body.name}`
-    // await this.runShell(dockerBuild);
-
-
-    //stop docker container
-    // console.log('start stop container', this.body.name);
-    // const dockerStop = `docker stop ${this.body.name}`
-    // await this.runShell(dockerStop);
-    // //remove docker container
-    // console.log('start remove container', this.body.name);
-    // const dockerRemove = `docker rm ${this.body.name}`
-    // await this.runShell(dockerRemove);
-    // //run docker container
-    // console.log('start run image', this.body.name);
-    // const dockerRun = `docker run -d -p 3008:3008 --name  ${this.body.name} ${this.body.name}`
-    // await this.runShell(dockerRun);
   }
 
 
   processPayload(payload) {
 
     console.log('start process', payload.repository.name);
-    //将this.body.name的字符切换为小写
     this.body.name = payload.repository.name
     this.body.url = payload.repository.ssh_url;
     try {
