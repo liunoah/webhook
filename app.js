@@ -56,14 +56,6 @@ class WebhookHandler {
     } catch (e) {
       console.log(e);
     }
-    // 查看docker logs 
-    const dockerLogsShell = `docker logs ${this.body.name}`;
-    try {
-      await this.runShell(dockerLogsShell);
-    } catch (e) {
-      console.log(e);
-    }
-
 
   }
 
