@@ -1,12 +1,90 @@
 const express = require('express');
 const { exec, spawn } = require('child_process');
-const fs = require('fs');
+const fs = require('fs'); 
 
+async function runShell(command) {
+   // 捕获代码异常
+   try {
+    console.log('run shell', command);
+    return new Promise((resolve, reject) => {
+      exec(command, (error, stdout, stderr) => {
+        if (error) {
+          console.error(`执行出错: ${error}`);
+          reject(error);
+          return;
+        }
+        console.log(`stdout: ${stdout}`);
+        resolve(stdout);
+      });
+    });
+  } catch (e) {
+    console.log(e);
+  }
+}
+
+async function cloneOrPull(body){
+  let shellScript;
+  if (!fs.existsSync(`./repo/${body.name}`)) {
+    console.log('start clone', body.name);
+    // shellScript = `git clone ${body.url} ./repo/${body.name}`;
+    // 跳过 yes or no
+    shellScript = `GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"  git clone ${body.url} ./repo/${body.name}`;
+
+  } else {
+    console.log('start pull', body.name);
+    // git -C ./repo/noahblog pull
+    shellScript = `git -C ./repo/${body.name} pull`;
+  }
+  await runShell(shellScript);
+
+  const buildShell = `sudo sh ./repo/${body.name}/build.sh`;
+  try {
+    await runShell(buildShell);
+  } catch (e) {
+    console.log(e);
+  }
+  return;
+}
+class Queue {
+  constructor() {
+      this.items = [];
+      this.isProcessing = false;
+  }
+
+  enqueue(item) {
+      this.items.push(item);
+      if (!this.isProcessing) {
+          this.isProcessing = true;
+          this.processQueue();
+      }
+  }
+
+  dequeue() {
+      return this.items.shift();
+  }
+
+  isEmpty() {
+      return this.items.length === 0;
+  }
+
+  async processQueue() {
+      while (!this.isEmpty()) {
+          const item = this.items[0];
+          console.log(`处理任务：${JSON.stringify(item)}`);
+          // 执行任务...
+          await cloneOrPull(item);
+          console.log(`任务处理完毕：${JSON.stringify(item)}`);
+          this.dequeue();
+      }
+      this.isProcessing = false;
+  }
+}
 class WebhookHandler {
   constructor() {
     this.app = express();
     this.PORT = process.env.PORT || 3002;
     this.app.use(express.json());
+    this.queue = new Queue();
   }
 
   body = {
@@ -14,59 +92,14 @@ class WebhookHandler {
     url: "",
   }
 
-  async runShell(command) {
-    // 捕获代码异常
-    try {
-      console.log('run shell', command);
-      return new Promise((resolve, reject) => {
-        exec(command, (error, stdout, stderr) => {
-          if (error) {
-            console.error(`执行出错: ${error}`);
-            reject(error);
-            return;
-          }
-          console.log(`stdout: ${stdout}`);
-          resolve(stdout);
-        });
-      });
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-
-  async cloneOrPull() {
-    let shellScript;
-    if (!fs.existsSync(`./repo/${this.body.name}`)) {
-      console.log('start clone', this.body.name);
-      // shellScript = `git clone ${this.body.url} ./repo/${this.body.name}`;
-      // 跳过 yes or no
-      shellScript = `GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"  git clone ${this.body.url} ./repo/${this.body.name}`;
-
-    } else {
-      console.log('start pull', this.body.name);
-      // git -C ./repo/noahblog pull
-      shellScript = `git -C ./repo/${this.body.name} pull`;
-    }
-    await this.runShell(shellScript);
-
-    const buildShell = `sudo sh ./repo/${this.body.name}/build.sh`;
-    try {
-      await this.runShell(buildShell);
-    } catch (e) {
-      console.log(e);
-    }
-
-  }
-
-
   processPayload(payload) {
 
     console.log('start process', payload.repository.name);
     this.body.name = payload.repository.name
     this.body.url = payload.repository.ssh_url;
     try {
-      this.cloneOrPull();
+      this.queue.enqueue(this.body);
+      
     }
     catch (e) {
       console.log(e);
