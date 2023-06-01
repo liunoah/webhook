@@ -2,6 +2,7 @@ const express = require('express');
 const { exec, spawn } = require('child_process');
 const fs = require('fs'); 
 
+// 执行 shell 命令
 async function runShell(command) {
    // 捕获代码异常
    try {
@@ -22,6 +23,7 @@ async function runShell(command) {
   }
 }
 
+// 克隆或者拉取代码
 async function cloneOrPull(body){
   let shellScript;
   if (!fs.existsSync(`./repo/${body.name}`)) {
@@ -37,6 +39,7 @@ async function cloneOrPull(body){
   }
   await runShell(shellScript);
 
+  // 执行构建脚本
   const buildShell = `sudo sh ./repo/${body.name}/build.sh`;
   try {
     await runShell(buildShell);
@@ -45,6 +48,7 @@ async function cloneOrPull(body){
   }
   return;
 }
+// 队列
 class Queue {
   constructor() {
       this.items = [];
@@ -86,7 +90,7 @@ class WebhookHandler {
     this.app.use(express.json());
     this.queue = new Queue();
   }
-
+  // 返回的 git clone url 和 repo name
   body = {
     name: "",
     url: "",
@@ -94,7 +98,7 @@ class WebhookHandler {
 
   processPayload(payload) {
 
-    console.log('start process', payload.repository.name);
+    console.log('add task queue', payload.repository.name);
     this.body.name = payload.repository.name
     this.body.url = payload.repository.ssh_url;
     try {
