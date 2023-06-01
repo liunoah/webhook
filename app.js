@@ -1,15 +1,12 @@
 const express = require('express');
 const { exec, spawn } = require('child_process');
 const fs = require('fs');
-const { Queue } = require('queue-typescript');
 
 class WebhookHandler {
   constructor() {
     this.app = express();
     this.PORT = process.env.PORT || 3002;
     this.app.use(express.json());
-    this.queue = new Queue();
-    this.isProcessing = false;
   }
 
   body = {
@@ -37,13 +34,15 @@ class WebhookHandler {
     }
   }
 
+
   async cloneOrPull() {
     let shellScript;
     if (!fs.existsSync(`./repo/${this.body.name}`)) {
-      console.log('startclone', this.body.name);
-      // shellScript = git clone ${this.body.url} ./repo/${this.body.name};
+      console.log('start clone', this.body.name);
+      // shellScript = `git clone ${this.body.url} ./repo/${this.body.name}`;
       // 跳过 yes or no
       shellScript = `GIT_SSH_COMMAND="ssh -o StrictHostKeyChecking=no"  git clone ${this.body.url} ./repo/${this.body.name}`;
+
     } else {
       console.log('start pull', this.body.name);
       // git -C ./repo/noahblog pull
@@ -57,32 +56,26 @@ class WebhookHandler {
     } catch (e) {
       console.log(e);
     }
+
   }
 
-  async processQueue() {
-    this.isProcessing = true;
-    while (!this.queue.isEmpty()) {
-      const payload = this.queue.dequeue();
-      console.log(`start process ${payload.repository.name}`);
-      this.body.name = payload.repository.name;
-      this.body.url = payload.repository.ssh_url;
-      try {
-        await this.cloneOrPull();
-      } catch (error) {
-        console.log(error);
-      }
-    }
-    this.isProcessing = false;
-  }
 
   processPayload(payload) {
-    this.queue.enqueue(payload);
-    if (!this.isProcessing) {
-      this.processQueue();
+
+    console.log('start process', payload.repository.name);
+    this.body.name = payload.repository.name
+    this.body.url = payload.repository.ssh_url;
+    try {
+      this.cloneOrPull();
     }
+    catch (e) {
+      console.log(e);
+    }
+
+
   }
 
-  handlePostRequest(req, res){
+  handlePostRequest(req, res) {
     const payload = req.body;
     res.status(200).send('OK');
     try {
