@@ -108,8 +108,6 @@ class WebhookHandler {
     catch (e) {
       console.log(e);
     }
-
-
   }
 
   handlePostRequest(req, res) {
